@@ -2,12 +2,11 @@
 
 namespace AirsoftAPI.Models
 {
-    public class Categoria
+    public class Cancha
     {
-        [Key]
         public int Id { get; set; }
         [Required]
-        public string Nombre { get; set; }
-
+        public string Name { get; set; }
+        public DateTime FechaCreacion { get; set; }
     }
 }

@@ -1,13 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AirsoftAPI.Models
+namespace AirsoftAPI.Models.Dtos
 {
-    public class Categoria
+    public class CategoriaDTO
     {
-        [Key]
         public int Id { get; set; }
-        [Required]
+        [Required(ErrorMessage = "El nombre es obligatorio")]
         public string Nombre { get; set; }
-
     }
 }

@@ -2,12 +2,11 @@
 
 namespace AirsoftAPI.Models
 {
-    public class Categoria
+    public class Reserva
     {
         [Key]
         public int Id { get; set; }
         [Required]
-        public string Nombre { get; set; }
-
+        public int MyProperty { get; set; }
     }
 }
