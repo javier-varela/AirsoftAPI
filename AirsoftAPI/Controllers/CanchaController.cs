@@ -13,8 +13,8 @@ namespace AirsoftAPI.Controllers
         {
             return new List<Cancha>
             {
-                new() {Id=1, Name = "Cancha 1"},
-                new() {Id=2, Name = "Cancha 2"}
+                new() {Id=1, Nombre = "Cancha 1"},
+                new() {Id=2, Nombre = "Cancha 2"}
             };
         }
     }

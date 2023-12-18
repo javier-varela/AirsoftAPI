@@ -1,17 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace AirsoftAPI.Models
+﻿namespace AirsoftAPI.Models.Dtos
 {
-    public class Usuario
+    public class UsuarioDTO
     {
-        [Key]
         public int Id { get; set; }
         public string Nombre { get; set; }
         public decimal Puntos { get; set; }
         public string Password { get; set; }
         public string Rol { get; set; }
         public List<Compra> Compras { get; set; }
-        public List<ProductoCarrito> ProductosCarrito { get; set; }
-
     }
 }

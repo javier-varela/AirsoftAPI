@@ -4,6 +4,7 @@ using AirsoftAPI.Repository.IRepository;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace AirsoftAPI.Controllers
 {
@@ -13,21 +14,34 @@ namespace AirsoftAPI.Controllers
     {
         private readonly IProductoRepository _repositoryProductos;
         private readonly IMapper _mapper;
-
+        protected ApiResponse _response;
         public ProductosController(IProductoRepository repositoryProductos, IMapper mapper)
         {
             _mapper = mapper;
             _repositoryProductos = repositoryProductos;
+            _response = new();
         }
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<IEnumerable<ProductoDTO>>> GetProductos()
+        public async Task<ActionResult<ApiResponse>> GetProductos()
         {
-            IEnumerable<Producto> listaProductos = await _repositoryProductos.GetAll();
-
-            return Ok(_mapper.Map<IEnumerable<ProductoDTO>>(listaProductos));
+            try
+            {
+                IEnumerable<Producto> listaProductos = await _repositoryProductos.GetAll(includeProperties:"Categoria");
+                _response.Result = _mapper.Map<IEnumerable<ProductoDTO>>(listaProductos);
+                _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.ErrorMessages.Add(ex.ToString());
+            }
+            _response.IsSuccess = false;
+            _response.StatusCode = HttpStatusCode.InternalServerError;
+            return _response;
+            
         }
 
         [HttpGet("{id:int}", Name = "GetProducto")]
@@ -35,16 +49,33 @@ namespace AirsoftAPI.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetProducto(int id)
+        public async Task<ActionResult<ApiResponse>> GetProducto(int id)
         {
-
-            var producto = await _repositoryProductos.Get(id);
-
-            if (producto == null)
+            try
             {
-                return NotFound();
+                if(id == 0)
+                {
+                    _response.StatusCode=HttpStatusCode.BadRequest;
+                    return BadRequest(_response);
+                }
+                var producto = await _repositoryProductos.GetFirstOrDefault(p => p.Id == id, includeProperties: "Categoria");
+
+                if (producto == null)
+                {
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_response);
+                }
+                _response.Result = _mapper.Map<ProductoDTO>(producto);
+                _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
             }
-            return Ok(_mapper.Map<ProductoDTO>(producto));
+            catch(Exception ex)
+            {
+                _response.ErrorMessages.Add(ex.ToString());
+            }
+            _response.IsSuccess = false;
+            _response.StatusCode = HttpStatusCode.InternalServerError;
+            return _response;
         }
 
         [HttpPost]
@@ -52,28 +83,44 @@ namespace AirsoftAPI.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> CrearProducto([FromBody] CrearProductoDTO crearProductoDTO)
+        public async Task<ActionResult<ApiResponse>> CrearProducto([FromBody] CrearProductoDTO crearProductoDTO)
         {
-            if (!ModelState.IsValid || crearProductoDTO == null)
+            try
             {
-                return BadRequest(ModelState);
-            }
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
 
-            if (await _repositoryProductos.Exists(crearProductoDTO.Nombre))
+                if (crearProductoDTO == null)
+                {
+                    return BadRequest(crearProductoDTO);
+                }
+
+                if (await _repositoryProductos.Exists(p => p.Nombre.ToLower().Trim() == crearProductoDTO.Nombre.ToLower().Trim()))
+                {
+                    ModelState.AddModelError("Nombre", "El producto ya existe");
+                    return StatusCode(StatusCodes.Status400BadRequest, ModelState);
+                }
+
+                var producto = _mapper.Map<Producto>(crearProductoDTO);
+
+                if (!await _repositoryProductos.Add(producto))
+                {
+                    throw new Exception("Error creando el producto");
+                }
+                _response.StatusCode = HttpStatusCode.Created;
+                _response.Result = producto;
+                return CreatedAtRoute("GetProduucto", new { id = producto.Id }, _response);
+            }
+            catch (Exception ex)
             {
-                ModelState.AddModelError("", "El producto ya existe");
-                return StatusCode(StatusCodes.Status400BadRequest, ModelState);
+                _response.ErrorMessages.Add(ex.ToString());
             }
+            _response.IsSuccess = false;
+            _response.StatusCode = HttpStatusCode.InternalServerError;
+            return StatusCode(500,_response);
 
-            var producto = _mapper.Map<Producto>(crearProductoDTO);
-
-            if (!await _repositoryProductos.Add(producto))
-            {
-                ModelState.AddModelError("", $"Algo salio mal guardando la categoria {producto.Nombre}");
-                return StatusCode(500, ModelState);
-            }
-
-            return CreatedAtRoute("GetCategoria", new { id = producto.Id }, producto);
         }
 
 
@@ -109,7 +156,7 @@ namespace AirsoftAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> DeleteProducto(int id)
         {
-            if (!await _repositoryProductos.Exists(id))
+            if (!await _repositoryProductos.Exists(p=>p.Id==id))
             {
                 return NotFound();
             }

@@ -11,6 +11,9 @@ namespace AirsoftAPI.AirsoftMapper
             CreateMap<Categoria, CategoriaDTO>().ReverseMap();
             CreateMap<Categoria, CrearCategoriaDTO>().ReverseMap();
             CreateMap<Producto, ProductoDTO>().ReverseMap();
+            CreateMap<Producto, CrearProductoDTO>().ReverseMap();
+            CreateMap<Usuario, UsuarioDTO>().ReverseMap();
+            CreateMap<ProductoCarrito, ProductoCarritoDTO>().ReverseMap();
 
         }
     }

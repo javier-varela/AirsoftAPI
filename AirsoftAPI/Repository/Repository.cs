@@ -20,13 +20,18 @@ namespace AirsoftAPI.Repository
             return await Save();
         }
 
-       
+        public async Task<bool> Exists(Expression<Func<T, bool>> predicate)
+        {
+            return await dbSet.AnyAsync(predicate);
+           
+        }
 
         public async Task<T> Get(int id)
         {
             return await dbSet.FindAsync(id);
         }
 
+        
         public async Task<List<T>> GetAll(Expression<Func<T, bool>> filter = null, Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null, string includeProperties = null)
         {
             IQueryable<T> query = dbSet;
@@ -50,6 +55,26 @@ namespace AirsoftAPI.Repository
             return await query.ToListAsync();
         }
 
+        public async Task<T> GetFirstOrDefault(Expression<Func<T, bool>> filter = null, string includeProperties = null)
+        {
+            IQueryable<T> query = dbSet;
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            if (!string.IsNullOrEmpty(includeProperties))
+            {
+                foreach (var includeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProperty);
+                }
+            }
+
+            return await query.FirstOrDefaultAsync();
+        }
+
+
         public Task<bool> Remove(int id)
         {
             throw new NotImplementedException();
@@ -58,6 +83,12 @@ namespace AirsoftAPI.Repository
         public async Task<bool> Remove(T entity)
         {
             dbSet.Remove(entity);
+            return await Save();
+        }
+
+        public async Task<bool> RemoveAll(List<T> list)
+        {
+            dbSet.RemoveRange(list);
             return await Save();
         }
 

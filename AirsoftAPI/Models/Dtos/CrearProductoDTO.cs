@@ -9,9 +9,9 @@ namespace AirsoftAPI.Models.Dtos
 
         [Required(ErrorMessage = "La Descripcion es obligatoria")]
         public string Descripcion { get; set; }
-        [Required(ErrorMessage = "El Precio es Pbligatorio")]
+        [Required(ErrorMessage = "El Precio es Obligatorio")]
         public decimal Precio { get; set; }
-        public string Imagen { get; set; }
+        public List<ImagenProducto> Imagenes { get; set; }
         public int CategoriaId { get; set; }
     }
 }

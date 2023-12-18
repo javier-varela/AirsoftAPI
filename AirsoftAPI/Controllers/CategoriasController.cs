@@ -4,6 +4,7 @@ using AirsoftAPI.Repository.IRepository;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AirsoftAPI.Controllers
 {
@@ -59,9 +60,9 @@ namespace AirsoftAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (await _repositoryCategoria.Exists(crearCategoriaDTO.Nombre))
+            if (await _repositoryCategoria.Exists(c => c.Nombre.ToLower().Trim() == crearCategoriaDTO.Nombre.ToLower().Trim()))
             {
-                ModelState.AddModelError("", "La categoria ya existe");
+                ModelState.AddModelError("", "La categoria con ese nombre ya existe");
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState);
             }
 
@@ -108,7 +109,7 @@ namespace AirsoftAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> DeleteCategoria(int id)
         {
-            if (!await _repositoryCategoria.Exists(id))
+            if (!await _repositoryCategoria.Exists(c=>c.Id==id))
             {
                 return NotFound();
             }

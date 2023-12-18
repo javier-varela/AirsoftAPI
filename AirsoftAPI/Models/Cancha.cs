@@ -6,7 +6,12 @@ namespace AirsoftAPI.Models
     {
         public int Id { get; set; }
         [Required]
-        public string Name { get; set; }
+        public string Nombre { get; set; }
         public DateTime FechaCreacion { get; set; }
+        public List<Reserva> Reservas { get; set; }
+        public List<ImagenCancha> Imagenes { get; set; }
+        public decimal PrecioHora { get; set; }
+        public int JugadoresMinimos { get; set; }
+        public decimal Area { get; set; }
     }
 }

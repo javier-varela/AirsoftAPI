@@ -15,16 +15,6 @@ namespace AirsoftAPI.Repository
             _db = db;
         }
 
-        public async Task<bool> Exists(string nombre)
-        {
-            return await _db.Productos.AnyAsync(c => c.Nombre.ToLower().Trim() == nombre.ToLower().Trim());
-        }
-
-        public async Task<bool> Exists(int id)
-        {
-            return await _db.Productos.AnyAsync(c => c.Id == id);
-        }
-
         public async Task<bool> Update(Producto producto)
         {
             _db.Productos.Update(producto);
