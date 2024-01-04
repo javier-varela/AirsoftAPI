@@ -25,13 +25,20 @@ namespace AirsoftAPI.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<ApiResponse>> GetProductos()
+        public async Task<ActionResult<ApiResponse>> GetProductos(int page = 1, int pageSize = 10)
         {
             try
             {
-                IEnumerable<Producto> listaProductos = await _repositoryProductos.GetAll(includeProperties:"Categoria");
+                int skip = (page - 1) * pageSize;
+
+                IEnumerable<Producto> listaProductos = await _repositoryProductos.GetAll(
+                    includeProperties: "Categoria,Imagenes",
+                    orderBy: q => q.OrderBy(p => p.Id),
+                    skip: skip,
+                    take: pageSize
+                );
+
                 _response.Result = _mapper.Map<IEnumerable<ProductoDTO>>(listaProductos);
-                _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
             }
             catch (Exception ex)
@@ -58,15 +65,16 @@ namespace AirsoftAPI.Controllers
                     _response.StatusCode=HttpStatusCode.BadRequest;
                     return BadRequest(_response);
                 }
-                var producto = await _repositoryProductos.GetFirstOrDefault(p => p.Id == id, includeProperties: "Categoria");
+                var producto = await _repositoryProductos.GetFirstOrDefault(p => p.Id == id, includeProperties: "Categoria,Imagenes");
 
                 if (producto == null)
                 {
                     _response.StatusCode = HttpStatusCode.NotFound;
+                    _response.IsSuccess = false;
                     return NotFound(_response);
                 }
                 _response.Result = _mapper.Map<ProductoDTO>(producto);
-                _response.StatusCode = HttpStatusCode.OK;
+             
                 return Ok(_response);
             }
             catch(Exception ex)
@@ -79,39 +87,46 @@ namespace AirsoftAPI.Controllers
         }
 
         [HttpPost]
-        [ProducesResponseType(201, Type = typeof(CategoriaDTO))]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<ApiResponse>> CrearProducto([FromBody] CrearProductoDTO crearProductoDTO)
+        public async Task<ActionResult<ApiResponse>> CrearProducto([FromForm] CrearProductoDTO crearProductoDTO)
         {
             try
             {
-                if (!ModelState.IsValid)
+                if (!ModelState.IsValid || crearProductoDTO == null)
                 {
-                    return BadRequest(ModelState);
-                }
-
-                if (crearProductoDTO == null)
-                {
-                    return BadRequest(crearProductoDTO);
+                    _response.IsSuccess = false;
+                    _response.StatusCode=HttpStatusCode.BadRequest;
+                    _response.Result = ModelState;
+                    return BadRequest(_response);
                 }
 
                 if (await _repositoryProductos.Exists(p => p.Nombre.ToLower().Trim() == crearProductoDTO.Nombre.ToLower().Trim()))
                 {
+                    _response.StatusCode=HttpStatusCode.BadRequest;
+                    _response.IsSuccess=false;
                     ModelState.AddModelError("Nombre", "El producto ya existe");
-                    return StatusCode(StatusCodes.Status400BadRequest, ModelState);
+                    _response.Result = ModelState;
+                    return BadRequest(_response);
                 }
-
-                var producto = _mapper.Map<Producto>(crearProductoDTO);
-
-                if (!await _repositoryProductos.Add(producto))
+                if (!await _repositoryProductos.AnyCategoriaAsync(crearProductoDTO.CategoriaId))
                 {
-                    throw new Exception("Error creando el producto");
+                    _response.IsSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    ModelState.AddModelError("CategoriaId", "La Categoria no existe");
+                    _response.Result = ModelState;
+                    return BadRequest(_response);
                 }
+                var producto = await _repositoryProductos.AddProducto(crearProductoDTO);
+                
+
                 _response.StatusCode = HttpStatusCode.Created;
-                _response.Result = producto;
-                return CreatedAtRoute("GetProduucto", new { id = producto.Id }, _response);
+                _response.Result = _mapper.Map<ProductoDTO>(producto);
+
+                
+
+                return CreatedAtRoute("GetProducto", new {id= producto.Id}, _response);
             }
             catch (Exception ex)
             {
@@ -124,29 +139,60 @@ namespace AirsoftAPI.Controllers
         }
 
 
-        [HttpPatch("{id:int}", Name = "PatchProducto")]
-        [ProducesResponseType(201, Type = typeof(CategoriaDTO))]
+        [HttpPatch("{id:int}", Name = "UpsertProducto")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PatchProducto(int id, [FromBody] ProductoDTO productoDTO)
+        public async Task<IActionResult> UpsertProducto(int id,[FromBody] CrearProductoDTO crearProductoDTO)
         {
-            if (!ModelState.IsValid || productoDTO == null || id != productoDTO.Id)
+
+            try
             {
-                return BadRequest(ModelState);
+                
+                var actualProduct = await _repositoryProductos.Get(id);
+                if (!ModelState.IsValid || crearProductoDTO == null)
+                {
+                    _response.IsSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Result = ModelState;
+                    return BadRequest(_response);
+                }
+                if (actualProduct == null)
+                {
+                    _response.IsSuccess = false;
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_response);
+                }
+                if (await _repositoryProductos.Exists(p => p.Nombre.ToLower().Trim() == crearProductoDTO.Nombre.ToLower().Trim())
+                    && crearProductoDTO.Nombre != actualProduct.Nombre)
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.IsSuccess = false;
+                    ModelState.AddModelError("Nombre", "El producto ya existe");
+                    _response.Result = ModelState;
+                    return BadRequest(_response);
+                } 
+                
+                
+                var producto = _mapper.Map<Producto>(crearProductoDTO);
+                producto.CategoriaId = id;
+
+                if (!await _repositoryProductos.Update(producto))
+                {
+                    throw new Exception("Error actualizando el producto");
+                }
+                return NoContent();
             }
-
-
-
-            var producto = _mapper.Map<Producto>(productoDTO);
-
-            if (!await _repositoryProductos.Update(producto))
+            catch (Exception ex)
             {
-                ModelState.AddModelError("", $"Algo salio mal actualizando el producto {producto.Nombre}");
-                return StatusCode(500, ModelState);
+                _response.ErrorMessages.Add(ex.ToString());
             }
+            _response.IsSuccess = false;
+            _response.StatusCode = HttpStatusCode.InternalServerError;
+            return StatusCode(500, _response);
 
-            return NoContent();
+
         }
 
         [HttpDelete("{id:int}", Name = "DeleteProducto")]
@@ -156,22 +202,31 @@ namespace AirsoftAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> DeleteProducto(int id)
         {
-            if (!await _repositoryProductos.Exists(p=>p.Id==id))
+            try
             {
-                return NotFound();
+                if (!await _repositoryProductos.Exists(p => p.Id == id))
+                {
+                    _response.IsSuccess = false;
+                    _response.StatusCode=HttpStatusCode.NotFound;
+                    return NotFound(_response);
+                }
+                var producto = await _repositoryProductos.Get(id);
+
+                if (!await _repositoryProductos.Remove(producto))
+                {
+                    throw new Exception("Error borrando el producto");
+                }
+
+                return NoContent();
             }
-
-
-
-            var producto = await _repositoryProductos.Get(id);
-
-            if (!await _repositoryProductos.Remove(producto))
+            catch (Exception ex)
             {
-                ModelState.AddModelError("", $"Algo salio mal borrando el producto {producto.Nombre}");
-                return StatusCode(500, ModelState);
+                _response.ErrorMessages.Add(ex.ToString());
             }
-
-            return NoContent();
+            _response.IsSuccess = false;
+            _response.StatusCode = HttpStatusCode.InternalServerError;
+            return StatusCode(500, _response);
+            
         }
 
 

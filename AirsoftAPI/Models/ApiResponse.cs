@@ -9,7 +9,7 @@ namespace AirsoftAPI.Models
             ErrorMessages = new List<string>();
         }
         public List<string> ErrorMessages { get; set; }
-        public HttpStatusCode StatusCode { get; set; }
+        public HttpStatusCode StatusCode { get; set; } = HttpStatusCode.OK;
         public bool IsSuccess { get; set; } = true;
         public object Result { get; set; }
         

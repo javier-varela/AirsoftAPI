@@ -14,7 +14,7 @@ namespace AirsoftAPI.Models
      
         [Range(0, int.MaxValue)]
         public decimal Precio { get; set; }
-        public List<ImagenProducto> Imagenes { get; set; }
+        public List<ImagenProducto> Imagenes { get; set; } = new List<ImagenProducto>();
 
         [ForeignKey("CategoriaId")]
         public int CategoriaId { get; set; }

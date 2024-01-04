@@ -11,7 +11,9 @@ namespace AirsoftAPI.Models.Dtos
         public string Descripcion { get; set; }
         [Required(ErrorMessage = "El Precio es Obligatorio")]
         public decimal Precio { get; set; }
-        public List<ImagenProducto> Imagenes { get; set; }
+        
+        public IFormFileCollection Imagenes { get; set; }
+        [Required(ErrorMessage = "La categoria es obligatoria")]
         public int CategoriaId { get; set; }
     }
 }

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34322.80
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirsoftAPI", "AirsoftAPI\AirsoftAPI.csproj", "{A002EDBA-E0CE-4609-B3E6-F052397D1494}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AirsoftAPI", "AirsoftAPI\AirsoftAPI.csproj", "{A002EDBA-E0CE-4609-B3E6-F052397D1494}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9499A5E0-FF5B-4315-A8A1-90A7FCE91C5F}"
 	ProjectSection(SolutionItems) = preProject

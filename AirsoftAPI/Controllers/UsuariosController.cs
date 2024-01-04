@@ -5,9 +5,13 @@ using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
+using AirsoftAPI.Utilities;
+using System.Security.Claims;
 
 namespace AirsoftAPI.Controllers
 {
+    
     [Route("api/[controller]")]
     [ApiController]
     public class UsuariosController : ControllerBase
@@ -23,9 +27,11 @@ namespace AirsoftAPI.Controllers
             _response = new();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ApiResponse>> GetUsuarios()
         {
             try
@@ -46,22 +52,31 @@ namespace AirsoftAPI.Controllers
 
         }
 
-
-        [HttpGet("{id:int}", Name = "GetUsuario")]
+        [Authorize]
+        [HttpGet("{id:int}", Name = "GetUsuarioById")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<ApiResponse>> GetUsuario(int id, bool includeCompras = false)
+        public async Task<ActionResult<ApiResponse>> GetUsuarioById(int id, bool includeCompras = false)
         {
             try
             {
+                
                 if (id == 0)
                 {
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.IsSuccess = false;
                     return BadRequest(_response);
                 }
+                //var userId = User.FindFirst(ClaimTypes.Name)?.Value;
+                //if (id.ToString() != userId)
+                //{
+                //    _response.StatusCode = HttpStatusCode.Forbidden;
+                //    _response.IsSuccess = false;
+                //    return _response;
+                //}
                 Usuario usuario;
                 if (includeCompras)
                 {
@@ -72,13 +87,15 @@ namespace AirsoftAPI.Controllers
                     usuario = await _repositoryUsuario.Get(id);
                 }
 
-
+                
                 if (usuario == null)
                 {
                     _response.StatusCode = HttpStatusCode.NotFound;
                     _response.IsSuccess = false;
                     return NotFound(_response);
                 }
+
+               
                 _response.Result = _mapper.Map<UsuarioDTO>(usuario);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
@@ -133,15 +150,14 @@ namespace AirsoftAPI.Controllers
 
 
         }
-        [HttpPost("LogIn")]
+        [HttpPost("Login")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<ApiResponse>> LogIn([FromBody] UsuarioLoginDTO usuarioLoginDTO)
+        public async Task<ActionResult<ApiResponse>> Login([FromBody] UsuarioLoginDTO usuarioLoginDTO)
         {
             try
             {
-
                 var loginResponse = await _repositoryUsuario.Login(usuarioLoginDTO);
 
                 if (loginResponse.Usuario == null || string.IsNullOrEmpty(loginResponse.Token))

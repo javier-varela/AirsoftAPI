@@ -12,7 +12,9 @@ namespace AirsoftAPI.Repository.IRepository
         Task<List<T>> GetAll(
             Expression<Func<T, bool>> filter = null,
             Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
-            string includeProperties = null
+            string includeProperties = null,
+            int skip = 0,
+            int take = 0
         );
         Task<bool> Add(T entity);
         Task<bool> Exists(Expression<Func<T, bool>> predicate);

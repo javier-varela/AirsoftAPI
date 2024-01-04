@@ -11,7 +11,7 @@ namespace AirsoftAPI.Models.Dtos
 
         public string Descripcion { get; set; }
         public decimal Precio { get; set; }
-        public List<ImagenProducto> Imagenes { get; set; }
+        public List<string> Imagenes { get; set; }
         public Categoria Categoria { get; set; }
     }
 }

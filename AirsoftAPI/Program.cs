@@ -2,9 +2,14 @@ using AirsoftAPI.AirsoftMapper;
 using AirsoftAPI.Data;
 using AirsoftAPI.Repository;
 using AirsoftAPI.Repository.IRepository;
+using AirsoftAPI.Services;
+using AirsoftAPI.Services.IServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Supabase.Interfaces;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,14 +20,22 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+//AzureStorage
+builder.Services.AddScoped<IAzureStorageService, AzureStorageService>();
 
+
+//supabase
+
+builder.Services.AddScoped<ISupabaseStorageService, SupabaseStorageService>();
 //Repositorios
 
-builder.Services.AddScoped<ICategoriaRepository,CategoriaRepository>();
+builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<ICarritoRepository, CarritoRepository>();
 builder.Services.AddScoped<ICompraRepository, CompraRepository>();
+
+
 
 var key = builder.Configuration.GetValue<string>("ApiSettings:Secret");
 
@@ -50,6 +63,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -66,6 +80,7 @@ builder.Services.AddCors(options =>
                           .AllowAnyMethod());
 });
 
+
 // En Configure
 
 var app = builder.Build();
@@ -79,7 +94,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
+
 app.UseAuthorization();
+
 
 app.MapControllers();
 

@@ -29,6 +29,7 @@ namespace AirsoftAPI.Repository
                 u=>u.Nombre.ToLower() == usuarioLoginDTO.Nombre.ToLower()
                 && u.Password == encryptedPassword
                 );
+
             if(usuario == null)
             {
                 return new UsuarioLoginResponseDTO()
@@ -38,7 +39,7 @@ namespace AirsoftAPI.Repository
                 };
             }
             var handleToken = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(secretPassword);
+            var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretPassword));
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -48,7 +49,7 @@ namespace AirsoftAPI.Repository
                     new(ClaimTypes.Role, usuario.Rol)
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new(new SymmetricSecurityKey(key),SecurityAlgorithms.HmacSha256)
+                SigningCredentials = new(key,SecurityAlgorithms.HmacSha256)
             };
             var token = handleToken.CreateToken(tokenDescriptor);
             UsuarioLoginResponseDTO usuarioLoginResponseDTO = new()

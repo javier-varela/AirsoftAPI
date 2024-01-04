@@ -23,7 +23,7 @@ namespace AirsoftAPI.Repository
         public async Task<bool> Exists(Expression<Func<T, bool>> predicate)
         {
             return await dbSet.AnyAsync(predicate);
-           
+
         }
 
         public async Task<T> Get(int id)
@@ -31,15 +31,25 @@ namespace AirsoftAPI.Repository
             return await dbSet.FindAsync(id);
         }
 
-        
-        public async Task<List<T>> GetAll(Expression<Func<T, bool>> filter = null, Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null, string includeProperties = null)
+
+        public async Task<List<T>> GetAll(
+            Expression<Func<T, bool>> filter = null,
+            Func<IQueryable<T>,
+            IOrderedQueryable<T>> orderBy = null,
+            string includeProperties = null,
+            int skip = 0,
+            int take = 0)
         {
             IQueryable<T> query = dbSet;
+            if (orderBy != null)
+            {
+                _ = orderBy(query);
+            }
             if (filter != null)
             {
                 query = query.Where(filter);
             }
-
+            
             if (includeProperties != null)
             {
                 foreach (var includeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
@@ -47,9 +57,15 @@ namespace AirsoftAPI.Repository
                     query = query.Include(includeProperty);
                 }
             }
-            if (orderBy != null)
+            
+            if (skip > 0)
             {
-                _ = orderBy(query);
+                query = query.Skip(skip);
+            }
+
+            if (take > 0)
+            {
+                query = query.Take(take);
             }
 
             return await query.ToListAsync();
@@ -94,7 +110,7 @@ namespace AirsoftAPI.Repository
 
         public async Task<bool> Save()
         {
-            return await _db.SaveChangesAsync()>=0;
+            return await _db.SaveChangesAsync() >= 0;
         }
     }
 }
