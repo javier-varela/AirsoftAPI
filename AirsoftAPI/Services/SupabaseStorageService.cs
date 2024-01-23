@@ -27,9 +27,9 @@ namespace AirsoftAPI.Services
             _supabase.InitializeAsync().Wait();
         }
 
-        public Task DeleteAsync(ContainerEnum container, string bucketName)
+        public async Task Delete(List<string> filesToRemove, string bucketName)
         {
-            throw new NotImplementedException();
+            await _supabase.Storage.From(bucketName).Remove(filesToRemove);
         }
 
         public async Task<string> UploadImageAsync(IFormFile imageFile, string bucketName, string directoryName)
@@ -61,9 +61,6 @@ namespace AirsoftAPI.Services
             return url;
         }
     }
-    internal class CreatedUploadSignedUrlResponse
-    {
-        [JsonProperty("url")]
-        public string Url { get; set; }
-    }
+
+   
 }

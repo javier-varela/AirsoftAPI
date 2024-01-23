@@ -96,7 +96,7 @@ namespace AirsoftAPI.Repository
             throw new NotImplementedException();
         }
 
-        public async Task<bool> Remove(T entity)
+        public virtual async Task<bool> Remove(T entity)
         {
             dbSet.Remove(entity);
             return await Save();

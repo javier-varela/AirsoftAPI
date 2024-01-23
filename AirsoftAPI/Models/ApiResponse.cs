@@ -13,7 +13,5 @@ namespace AirsoftAPI.Models
         public bool IsSuccess { get; set; } = true;
         public object Result { get; set; }
         
-
-       
     }
 }

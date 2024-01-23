@@ -3,12 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace AirsoftAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class BigMigration : Migration
+    public partial class Migracion : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,8 +17,7 @@ namespace AirsoftAPI.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FechaCreacion = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PrecioHora = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     JugadoresMinimos = table.Column<int>(type: "int", nullable: false),
                     Area = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
@@ -66,6 +63,7 @@ namespace AirsoftAPI.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Url = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CanchaId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -162,8 +160,9 @@ namespace AirsoftAPI.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ProductoId = table.Column<int>(type: "int", nullable: false),
-                    Url = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Url = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ProductoId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -172,65 +171,8 @@ namespace AirsoftAPI.Migrations
                         name: "FK_ImagenesProductos_Productos_ProductoId",
                         column: x => x.ProductoId,
                         principalTable: "Productos",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
-
-            migrationBuilder.CreateTable(
-                name: "ProductosCarrito",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ProductoId = table.Column<int>(type: "int", nullable: false),
-                    Cantidad = table.Column<int>(type: "int", nullable: false),
-                    IdUsuario = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ProductosCarrito", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ProductosCarrito_Productos_ProductoId",
-                        column: x => x.ProductoId,
-                        principalTable: "Productos",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ProductosCarrito_Usuario_IdUsuario",
-                        column: x => x.IdUsuario,
-                        principalTable: "Usuario",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.InsertData(
-                table: "Categorias",
-                columns: new[] { "Id", "Nombre" },
-                values: new object[,]
-                {
-                    { 1, "Armas" },
-                    { 2, "Cascos" },
-                    { 3, "Chalecos" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "Productos",
-                columns: new[] { "Id", "CategoriaId", "Descripcion", "Nombre", "Precio" },
-                values: new object[,]
-                {
-                    { 1, 1, "Réplica de fusil de asalto con mira telescópica", "Fusil de Asalto", 599.99m },
-                    { 2, 2, "Casco resistente con visor y protección balística", "Casco Táctico", 149.99m },
-                    { 3, 3, "Chaleco con múltiples compartimentos y sistema MOLLE", "Chaleco Táctico", 89.99m },
-                    { 4, 1, "Réplica de pistola semiautomática para airsoft", "Pistola de Airsoft", 129.99m },
-                    { 5, 1, "Granada de humo para estrategias tácticas", "Granada de Humo", 19.99m },
-                    { 6, 2, "Máscara protectora para el rostro con diseño intimidante", "Máscara Facial", 49.99m },
-                    { 7, 3, "Chaqueta resistente con bolsillos y paneles de velcro", "Chaqueta Táctica", 79.99m }
-                });
-
-            migrationBuilder.InsertData(
-                table: "ImagenesProductos",
-                columns: new[] { "Id", "ProductoId", "Url" },
-                values: new object[] { 1, 1, "imagen.jpeg" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Compras_IdProducto",
@@ -258,16 +200,6 @@ namespace AirsoftAPI.Migrations
                 column: "CategoriaId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProductosCarrito_IdUsuario",
-                table: "ProductosCarrito",
-                column: "IdUsuario");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ProductosCarrito_ProductoId",
-                table: "ProductosCarrito",
-                column: "ProductoId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Reservas_CanchaId",
                 table: "Reservas",
                 column: "CanchaId");
@@ -289,9 +221,6 @@ namespace AirsoftAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "ImagenesProductos");
-
-            migrationBuilder.DropTable(
-                name: "ProductosCarrito");
 
             migrationBuilder.DropTable(
                 name: "Reservas");

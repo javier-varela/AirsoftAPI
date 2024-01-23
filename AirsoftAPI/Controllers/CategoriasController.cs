@@ -14,21 +14,23 @@ namespace AirsoftAPI.Controllers
     {
         private readonly ICategoriaRepository _repositoryCategoria;
         private readonly IMapper _mapper;
-
+        protected ApiResponse _response;
         public CategoriasController(ICategoriaRepository repositoryCategoria, IMapper mapper)
         {
             _mapper = mapper;
             _repositoryCategoria = repositoryCategoria;
+            _response = new();
         }
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<IEnumerable<CategoriaDTO>>> GetCategorias()
+        public async Task<ActionResult<ApiResponse>> GetCategorias()
         {
             IEnumerable<Categoria> listaCategorias = await _repositoryCategoria.GetAll();
+            _response.Result = _mapper.Map<IEnumerable<CategoriaDTO>>(listaCategorias);
 
-            return Ok(_mapper.Map<IEnumerable<CategoriaDTO>>(listaCategorias));
+            return Ok(_response);
         }
 
         [HttpGet("{id:int}", Name ="GetCategoria")]

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AirsoftAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231218004603_BigMigration")]
-    partial class BigMigration
+    [Migration("20240121001448_Migracion")]
+    partial class Migracion
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,14 +36,10 @@ namespace AirsoftAPI.Migrations
                     b.Property<decimal>("Area")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTime>("FechaCreacion")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("JugadoresMinimos")
                         .HasColumnType("int");
 
                     b.Property<string>("Nombre")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("PrecioHora")
@@ -69,23 +65,6 @@ namespace AirsoftAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categorias");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Nombre = "Armas"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Nombre = "Cascos"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Nombre = "Chalecos"
-                        });
                 });
 
             modelBuilder.Entity("AirsoftAPI.Models.Compra", b =>
@@ -128,6 +107,9 @@ namespace AirsoftAPI.Migrations
                     b.Property<int?>("CanchaId")
                         .HasColumnType("int");
 
+                    b.Property<string>("FileName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Url")
                         .HasColumnType("nvarchar(max)");
 
@@ -146,7 +128,10 @@ namespace AirsoftAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ProductoId")
+                    b.Property<string>("FileName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ProductoId")
                         .HasColumnType("int");
 
                     b.Property<string>("Url")
@@ -157,14 +142,6 @@ namespace AirsoftAPI.Migrations
                     b.HasIndex("ProductoId");
 
                     b.ToTable("ImagenesProductos");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            ProductoId = 1,
-                            Url = "imagen.jpeg"
-                        });
                 });
 
             modelBuilder.Entity("AirsoftAPI.Models.Producto", b =>
@@ -192,90 +169,6 @@ namespace AirsoftAPI.Migrations
                     b.HasIndex("CategoriaId");
 
                     b.ToTable("Productos");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CategoriaId = 1,
-                            Descripcion = "Réplica de fusil de asalto con mira telescópica",
-                            Nombre = "Fusil de Asalto",
-                            Precio = 599.99m
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CategoriaId = 2,
-                            Descripcion = "Casco resistente con visor y protección balística",
-                            Nombre = "Casco Táctico",
-                            Precio = 149.99m
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CategoriaId = 3,
-                            Descripcion = "Chaleco con múltiples compartimentos y sistema MOLLE",
-                            Nombre = "Chaleco Táctico",
-                            Precio = 89.99m
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CategoriaId = 1,
-                            Descripcion = "Réplica de pistola semiautomática para airsoft",
-                            Nombre = "Pistola de Airsoft",
-                            Precio = 129.99m
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CategoriaId = 1,
-                            Descripcion = "Granada de humo para estrategias tácticas",
-                            Nombre = "Granada de Humo",
-                            Precio = 19.99m
-                        },
-                        new
-                        {
-                            Id = 6,
-                            CategoriaId = 2,
-                            Descripcion = "Máscara protectora para el rostro con diseño intimidante",
-                            Nombre = "Máscara Facial",
-                            Precio = 49.99m
-                        },
-                        new
-                        {
-                            Id = 7,
-                            CategoriaId = 3,
-                            Descripcion = "Chaqueta resistente con bolsillos y paneles de velcro",
-                            Nombre = "Chaqueta Táctica",
-                            Precio = 79.99m
-                        });
-                });
-
-            modelBuilder.Entity("AirsoftAPI.Models.ProductoCarrito", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Cantidad")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IdUsuario")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProductoId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IdUsuario");
-
-                    b.HasIndex("ProductoId");
-
-                    b.ToTable("ProductosCarrito");
                 });
 
             modelBuilder.Entity("AirsoftAPI.Models.Reserva", b =>
@@ -362,9 +255,7 @@ namespace AirsoftAPI.Migrations
                 {
                     b.HasOne("AirsoftAPI.Models.Producto", null)
                         .WithMany("Imagenes")
-                        .HasForeignKey("ProductoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ProductoId");
                 });
 
             modelBuilder.Entity("AirsoftAPI.Models.Producto", b =>
@@ -376,25 +267,6 @@ namespace AirsoftAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Categoria");
-                });
-
-            modelBuilder.Entity("AirsoftAPI.Models.ProductoCarrito", b =>
-                {
-                    b.HasOne("AirsoftAPI.Models.Usuario", "Usuario")
-                        .WithMany("ProductosCarrito")
-                        .HasForeignKey("IdUsuario")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AirsoftAPI.Models.Producto", "Producto")
-                        .WithMany()
-                        .HasForeignKey("ProductoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Producto");
-
-                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("AirsoftAPI.Models.Reserva", b =>
@@ -431,8 +303,6 @@ namespace AirsoftAPI.Migrations
             modelBuilder.Entity("AirsoftAPI.Models.Usuario", b =>
                 {
                     b.Navigation("Compras");
-
-                    b.Navigation("ProductosCarrito");
                 });
 #pragma warning restore 612, 618
         }

@@ -25,12 +25,11 @@ namespace AirsoftAPI.Repository
         public async Task<UsuarioLoginResponseDTO> Login(UsuarioLoginDTO usuarioLoginDTO)
         {
             var encryptedPassword = Getmd5(usuarioLoginDTO.Password);
-            var usuario = await _db.Usuario.FirstOrDefaultAsync(
-                u=>u.Nombre.ToLower() == usuarioLoginDTO.Nombre.ToLower()
-                && u.Password == encryptedPassword
-                );
+            var usuario = await GetFirstOrDefault(
+                u => u.Nombre.ToLower() == usuarioLoginDTO.Nombre.ToLower()
+                && u.Password == encryptedPassword);
 
-            if(usuario == null)
+            if (usuario == null)
             {
                 return new UsuarioLoginResponseDTO()
                 {
@@ -46,10 +45,11 @@ namespace AirsoftAPI.Repository
                 Subject = new ClaimsIdentity(new Claim[]
                 {
                     new(ClaimTypes.Name, usuario.Nombre.ToString()),
-                    new(ClaimTypes.Role, usuario.Rol)
+                    new(ClaimTypes.Role, usuario.Rol),
+                    new(ClaimTypes.NameIdentifier, usuario.Id.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new(key,SecurityAlgorithms.HmacSha256)
+                SigningCredentials = new(key, SecurityAlgorithms.HmacSha256)
             };
             var token = handleToken.CreateToken(tokenDescriptor);
             UsuarioLoginResponseDTO usuarioLoginResponseDTO = new()
@@ -90,7 +90,7 @@ namespace AirsoftAPI.Repository
         public async Task<bool> IsUniqueUser(string nombre)
         {
             var usuariodb = await _db.Usuario.FirstOrDefaultAsync(u => u.Nombre == nombre);
-            if(usuariodb == null)
+            if (usuariodb == null)
             {
                 return true;
             }

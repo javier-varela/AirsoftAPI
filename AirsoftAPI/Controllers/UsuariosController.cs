@@ -27,7 +27,7 @@ namespace AirsoftAPI.Controllers
             _response = new();
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize("Admin")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -52,7 +52,7 @@ namespace AirsoftAPI.Controllers
 
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpGet("{id:int}", Name = "GetUsuarioById")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

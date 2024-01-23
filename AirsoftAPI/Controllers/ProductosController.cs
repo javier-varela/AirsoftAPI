@@ -31,13 +31,15 @@ namespace AirsoftAPI.Controllers
             {
                 int skip = (page - 1) * pageSize;
 
-                IEnumerable<Producto> listaProductos = await _repositoryProductos.GetAll(
+                //obtener productos
+                List<Producto> listaProductos = await _repositoryProductos.GetAll(
                     includeProperties: "Categoria,Imagenes",
                     orderBy: q => q.OrderBy(p => p.Id),
                     skip: skip,
                     take: pageSize
                 );
 
+                
                 _response.Result = _mapper.Map<IEnumerable<ProductoDTO>>(listaProductos);
                 return Ok(_response);
             }
@@ -65,6 +67,8 @@ namespace AirsoftAPI.Controllers
                     _response.StatusCode=HttpStatusCode.BadRequest;
                     return BadRequest(_response);
                 }
+
+                //Obtener Producto
                 var producto = await _repositoryProductos.GetFirstOrDefault(p => p.Id == id, includeProperties: "Categoria,Imagenes");
 
                 if (producto == null)
@@ -73,6 +77,8 @@ namespace AirsoftAPI.Controllers
                     _response.IsSuccess = false;
                     return NotFound(_response);
                 }
+
+                
                 _response.Result = _mapper.Map<ProductoDTO>(producto);
              
                 return Ok(_response);
@@ -118,6 +124,8 @@ namespace AirsoftAPI.Controllers
                     _response.Result = ModelState;
                     return BadRequest(_response);
                 }
+
+                //Agregar Producto
                 var producto = await _repositoryProductos.AddProducto(crearProductoDTO);
                 
 
@@ -144,14 +152,14 @@ namespace AirsoftAPI.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> UpsertProducto(int id,[FromBody] CrearProductoDTO crearProductoDTO)
+        public async Task<IActionResult> UpsertProducto(int id,[FromForm] UpdateProductoDTO updateProductoDTO)
         {
 
             try
             {
                 
                 var actualProduct = await _repositoryProductos.Get(id);
-                if (!ModelState.IsValid || crearProductoDTO == null)
+                if (!ModelState.IsValid || updateProductoDTO == null)
                 {
                     _response.IsSuccess = false;
                     _response.StatusCode = HttpStatusCode.BadRequest;
@@ -164,8 +172,8 @@ namespace AirsoftAPI.Controllers
                     _response.StatusCode = HttpStatusCode.NotFound;
                     return NotFound(_response);
                 }
-                if (await _repositoryProductos.Exists(p => p.Nombre.ToLower().Trim() == crearProductoDTO.Nombre.ToLower().Trim())
-                    && crearProductoDTO.Nombre != actualProduct.Nombre)
+                if (actualProduct.Nombre.ToLower().Trim() == updateProductoDTO.Nombre.ToLower().Trim()
+                    && updateProductoDTO.Nombre != actualProduct.Nombre)
                 {
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.IsSuccess = false;
@@ -174,11 +182,7 @@ namespace AirsoftAPI.Controllers
                     return BadRequest(_response);
                 } 
                 
-                
-                var producto = _mapper.Map<Producto>(crearProductoDTO);
-                producto.CategoriaId = id;
-
-                if (!await _repositoryProductos.Update(producto))
+                if (!await _repositoryProductos.Update(updateProductoDTO))
                 {
                     throw new Exception("Error actualizando el producto");
                 }
@@ -210,7 +214,7 @@ namespace AirsoftAPI.Controllers
                     _response.StatusCode=HttpStatusCode.NotFound;
                     return NotFound(_response);
                 }
-                var producto = await _repositoryProductos.Get(id);
+                var producto = await _repositoryProductos.GetFirstOrDefault(p=>p.Id==id,includeProperties:"Imagenes");
 
                 if (!await _repositoryProductos.Remove(producto))
                 {

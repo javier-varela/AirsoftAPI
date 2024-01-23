@@ -6,6 +6,6 @@ namespace AirsoftAPI.Services.IServices
     {
         Task<string> UploadImageAsync(IFormFile imageFile, string bucketName, string directoryName);
 
-        Task DeleteAsync(ContainerEnum container, string blobFileName);
+        Task Delete(List<string> filesToRemove, string bucketName);
     }
 }

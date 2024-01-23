@@ -7,7 +7,7 @@ namespace AirsoftAPI.Models
     {
         [Key]
         public int Id { get; set; }
-        public int ProductoId { get; set; }
         public string Url { get; set; }
+        public string FileName { get; set; }
     }
 }

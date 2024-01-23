@@ -1,15 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AirsoftAPI.Models
+namespace AirsoftAPI.Models.Dtos
 {
-    public class Cancha
+    public class CrearCanchaDTO
     {
-        public int Id { get; set; }
+        [Required]
         public string Nombre { get; set; }
-        public List<Reserva> Reservas { get; set; }
-        public List<ImagenCancha> Imagenes { get; set; }
+        public IFormFileCollection Imagenes { get; set; }
+        [Required]
         public decimal PrecioHora { get; set; }
+        [Required]
         public int JugadoresMinimos { get; set; }
+        [Required]
         public decimal Area { get; set; }
     }
 }

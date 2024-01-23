@@ -3,10 +3,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AirsoftAPI.Models.Dtos
 {
-    public class ProductoCarritoDTO
+    public class CrearCompraDTO
     {
-        public int Id { get; set; }
-        public Producto Producto { get; set; }
+        public int IdUsuario { get; set; }
+        public int IdProducto { get; set; }
         public int Cantidad { get; set; }
     }
 }

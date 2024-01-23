@@ -11,7 +11,6 @@ namespace AirsoftAPI.Models
         public string Password { get; set; }
         public string Rol { get; set; }
         public List<Compra> Compras { get; set; }
-        public List<ProductoCarrito> ProductosCarrito { get; set; }
 
     }
 }
