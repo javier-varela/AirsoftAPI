@@ -2,6 +2,7 @@
 using AirsoftAPI.Models.Dtos;
 using AirsoftAPI.Repository.IRepository;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq.Expressions;
@@ -24,6 +25,7 @@ namespace AirsoftAPI.Controllers
             _response = new();
         }
 
+        
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]

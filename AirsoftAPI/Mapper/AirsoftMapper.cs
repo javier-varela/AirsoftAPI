@@ -14,6 +14,8 @@ namespace AirsoftAPI.AirsoftMapper
             CreateMap<Usuario, UsuarioDTO>().ReverseMap();
             CreateMap<Compra, CrearCompraDTO>().ReverseMap();
             CreateMap<Compra, CompraDTO>().ReverseMap();
+            CreateMap<Cancha, CrearCanchaDTO>().ReverseMap();
+            CreateMap<Cancha, CanchaDTO>().ReverseMap();
 
         }
     }

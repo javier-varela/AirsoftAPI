@@ -24,7 +24,7 @@ namespace AirsoftAPI.Repository
             _supabaseStorageService = supabaseStorageService;
 
         }
-        public async Task<bool> AddCancha(CrearCanchaDTO crearCanchaDTO)
+        public async Task<Cancha> AddCancha(CrearCanchaDTO crearCanchaDTO)
         {
 
             Cancha cancha = new()
@@ -32,7 +32,8 @@ namespace AirsoftAPI.Repository
                 Nombre = crearCanchaDTO.Nombre,
                 PrecioHora = crearCanchaDTO.PrecioHora,
                 JugadoresMinimos = crearCanchaDTO.JugadoresMinimos,
-                Area = crearCanchaDTO.Area
+                Area = crearCanchaDTO.Area,
+                Imagenes = new()
             };
             if (!crearCanchaDTO.Imagenes.IsNullOrEmpty())
             {
@@ -53,9 +54,12 @@ namespace AirsoftAPI.Repository
                 }
             }
             await _db.Canchas.AddAsync(cancha);
+            if(await Save())
+            {
+                return cancha;
+            }
 
-
-            return await Save();
+            throw new Exception("Error Guardando el producto"); 
         }
 
 
