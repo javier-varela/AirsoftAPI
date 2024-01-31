@@ -26,6 +26,8 @@ namespace AirsoftAPI.Repository
             {
                 throw new Exception("No hay suficientes existencias del producto");
             }
+            usuario.Puntos -= total;
+            producto.Stock -= compra.Cantidad;
 
             await _db.Compras.AddAsync(compra);
            
@@ -33,7 +35,6 @@ namespace AirsoftAPI.Repository
             {
                 _db.Productos.Update(producto);
                 _db.Usuario.Update(usuario);
-                _db.Productos.Update(producto);
                
             }
 

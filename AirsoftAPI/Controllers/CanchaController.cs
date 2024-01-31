@@ -22,6 +22,45 @@ namespace AirsoftAPI.Controllers
             _repositoryCancha = canchaRepository;
             _response = new();
         }
+
+        [HttpGet("{id:int}", Name = "GetCancha")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<ApiResponse>> GetCancha(int id)
+        {
+            try
+            {
+                if (id == 0)
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_response);
+                }
+
+                //Obtener Producto
+                var producto = await _repositoryCancha.GetFirstOrDefault(p => p.Id == id, includeProperties: "Imagenes");
+
+                if (producto == null)
+                {
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    _response.IsSuccess = false;
+                    return NotFound(_response);
+                }
+
+
+                _response.Result = _mapper.Map<ProductoDTO>(producto);
+
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.ErrorMessages.Add(ex.ToString());
+            }
+            _response.IsSuccess = false;
+            _response.StatusCode = HttpStatusCode.InternalServerError;
+            return _response;
+        }
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -97,6 +136,7 @@ namespace AirsoftAPI.Controllers
             return StatusCode(500, _response);
 
         }
+
 
 
     }

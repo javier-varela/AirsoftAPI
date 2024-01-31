@@ -68,7 +68,8 @@ namespace AirsoftAPI.Repository
             {
                 Nombre = usuarioRegistroDTO.Nombre,
                 Password = encryptedPassword,
-                Rol = UserRoles.Client
+                Rol = UserRoles.Client,
+                Puntos = 10000
             };
             await _db.Usuario.AddAsync(usuario);
             await Save();

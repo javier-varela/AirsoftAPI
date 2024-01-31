@@ -10,7 +10,7 @@ namespace AirsoftAPI.Models
         public decimal Puntos { get; set; }
         public string Password { get; set; }
         public string Rol { get; set; }
-        public List<Compra> Compras { get; set; }
+        public List<Compra> Compras { get; set; } = new();
 
     }
 }

@@ -27,7 +27,7 @@ namespace AirsoftAPI.Controllers
             _response = new();
         }
 
-        [Authorize("Admin")]
+
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -84,7 +84,7 @@ namespace AirsoftAPI.Controllers
                 }
                 else
                 {
-                    usuario = await _repositoryUsuario.Get(id);
+                    usuario = await _repositoryUsuario.GetFirstOrDefault(u=>u.Id==id);
                 }
 
                 

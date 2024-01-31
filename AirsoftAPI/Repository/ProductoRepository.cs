@@ -32,7 +32,8 @@ namespace AirsoftAPI.Repository
                 Nombre = crearProductoDTO.Nombre,
                 Precio = crearProductoDTO.Precio,
                 Descripcion = crearProductoDTO.Descripcion,
-                CategoriaId = crearProductoDTO.CategoriaId
+                CategoriaId = crearProductoDTO.CategoriaId,
+                Stock = crearProductoDTO.Stock,
             };
             if (!crearProductoDTO.Imagenes.IsNullOrEmpty())
             {

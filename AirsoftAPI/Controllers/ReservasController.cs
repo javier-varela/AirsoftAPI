@@ -13,12 +13,12 @@ namespace AirsoftAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ComprasController : ControllerBase
+    public class ReservasController : ControllerBase
     {
         private readonly ICompraRepository _repositoryCompras;
         private readonly IMapper _mapper;
         protected ApiResponse _response;
-        public ComprasController(ICompraRepository compraRepository, IMapper mapper)
+        public ReservasController(ICompraRepository compraRepository, IMapper mapper)
         {
             _mapper = mapper;
             _repositoryCompras = compraRepository;
